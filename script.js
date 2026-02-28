@@ -7,6 +7,7 @@ let allCards = document.getElementById("allCards");
 
 let interviewList = [];
 let rejectedList = [];
+let currentStatus = "all";
 
 const allBtn = document.getElementById("all-btn");
 const interBtn =document.getElementById("inter-btn");
@@ -38,20 +39,27 @@ function toggleStyle(id){
     
 
     const selected =document.getElementById(id);
+    currentStatus = id;
 
     
 
     selected.classList.remove("bg-white", "text-black");
     selected.classList.add("bg-blue-500", "text-white");
 
-    if(id == 'inter-btn'){
+    if(id === 'inter-btn'){
         allCards.classList.add("hidden");
         filterSection.classList.remove("hidden");
+        renderInterview();
 
     }
-    else if(id == 'all-btn'){
+    else if(id === 'all-btn'){
         allCards.classList.remove("hidden");
         filterSection.classList.add("hidden");
+    }else if(id === 'reject-btn'){
+         allCards.classList.add("hidden");
+        filterSection.classList.remove("hidden");
+        renderReject();
+
     }
 
 
@@ -71,7 +79,7 @@ mainContainer.addEventListener("click",function(event){
         const status = parentNode.querySelector('.status').innerText;
         const notes = parentNode.querySelector('.notes').innerText;
 
-        parentNode.querySelector('.status').innerTex = "Interview";
+        parentNode.querySelector('.status').innerText = "Interview";
 
         const cardInfo = {
             mobile,
@@ -83,16 +91,21 @@ mainContainer.addEventListener("click",function(event){
 
         const mobileExist = interviewList.find(item => item.mobile == cardInfo.mobile);
 
-         parentNode.querySelector('.status').innerTex = "Interview";
+         parentNode.querySelector('.status').innerText = "Interview";
 
         if(!mobileExist){
             interviewList.push(cardInfo);
         }
 
+        rejectedList = rejectedList.filter(item => item.mobile !== cardInfo.mobile);
+
         calculateCount();
 
+        if(currentStatus == 'reject-btn'){
+            renderReject();
+        }
 
-        renderInterview ();
+       
 
     }else if(event.target.classList.contains("rejectButton")) {
         const parentNode = event.target.parentNode.parentNode;
@@ -102,7 +115,7 @@ mainContainer.addEventListener("click",function(event){
         const status = parentNode.querySelector('.status').innerText;
         const notes = parentNode.querySelector('.notes').innerText;
 
-        parentNode.querySelector('.status').innerTex = "Reject";
+        parentNode.querySelector('.status').innerText = "Rejected";
 
         const cardInfo = {
             mobile,
@@ -114,24 +127,40 @@ mainContainer.addEventListener("click",function(event){
 
         const mobileExist = rejectedList.find(item => item.mobile == cardInfo.mobile);
 
-         parentNode.querySelector('.status').innerTex = "Interview";
+         parentNode.querySelector('.status').innerText = "Rejected";
 
         if(!mobileExist){
             rejectedList.push(cardInfo);
         }
 
+        interviewList = interviewList.filter(item => item.mobile !== cardInfo.mobile);
+
+        if(currentStatus == 'inter-btn'){
+            renderInterview();
+
+        }
+
         calculateCount();
 
+        
 
-        renderReject();
+
+
+
 
     }
 
     
 })
 
+
 function renderInterview (){
     filterSection.innerHTML = '';
+
+    if(interviewList.length ===0){
+        noJobs();
+        return;
+    }
 
     for(let interview of interviewList){
         let div = document.createElement('div');
@@ -158,12 +187,17 @@ function renderInterview (){
                     <button class="trash"><i class="fa-solid fa-trash-can"></i></button>
                 </div>`
 
-                filterSection.appendChild('div');
+                filterSection.appendChild(div);
     }
 }
 
 function renderReject(){
     filterSection.innerHTML = '';
+
+    if(rejectedList.length === 0){
+        noJobs();
+        return;
+    }
 
     for(let reject of rejectedList){
         let div = document.createElement('div');
@@ -190,6 +224,16 @@ function renderReject(){
                     <button class="trash"><i class="fa-solid fa-trash-can"></i></button>
                 </div>`
 
-                filterSection.appendChild('div');
+                filterSection.appendChild(div);
     }
+}
+
+function noJobs(){
+    filterSection.innerHTML = `
+    <div class="flex flex-col items-center justify-center py-20 text-center text-gray-500">
+            <img src="./jobs.png" alt="">
+            <h2 class="text-xl font-semibold text-gray-700">No jobs available</h2>
+            <p class="text-sm mt-2">Check back soon for new job opportunities</p>
+        </div>`;
+
 }
